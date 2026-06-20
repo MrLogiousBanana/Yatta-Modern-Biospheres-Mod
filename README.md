@@ -11,6 +11,7 @@ Experience a completely new way to play Minecraft! Instead of endless terrain, t
 * **Perfectly Sealed Domes:** The generator ensures every glass dome is perfectly spherical and sealed, trimming away stray trees and terrain.
 * **Safe Spawns:** Never spawn on the glass roof again! The mod intelligently teleports you safely inside the first sphere when you join the world or respawn.
 * **Seamless Structure Integration:** Villages, temples, and outposts spawn naturally inside the spheres, cleanly cut off at the glass boundaries.
+* **Third-Party Mod Support:** Fully compatible with custom biomes from other mods! Your favorite modded trees, grass, and mushrooms will generate perfectly inside their own dedicated biospheres.
 
 ### Supported Versions & Modloaders
 This repository is a monorepo containing source code for multiple Minecraft versions and modloaders:
@@ -39,6 +40,7 @@ This repository is a monorepo containing source code for multiple Minecraft vers
 * **Идеальная герметичность:** Генератор гарантирует, что каждый стеклянный купол имеет идеальную форму и герметичен, аккуратно обрезая выступающие деревья и ландшафт.
 * **Безопасный спавн:** Больше никаких возрождений на стеклянной крыше! Мод автоматически телепортирует вас в безопасное место внутрь начальной сферы при входе в мир или возрождении.
 * **Интеграция структур:** Деревни, храмы и аванпосты естественно генерируются внутри сфер, аккуратно вписываясь в границы стекла.
+* **Поддержка сторонних модов:** Полная совместимость с кастомными биомами из других модов! Твои любимые деревья, трава и грибы из модов будут идеально генерироваться внутри своих собственных биосфер.
 
 ### Поддерживаемые версии
 Этот репозиторий является монорепой (monorepo) и содержит исходный код для нескольких версий и загрузчиков:
@@ -51,3 +53,19 @@ This repository is a monorepo containing source code for multiple Minecraft vers
 2. **Risugami** (Создатель оригинального концепта Biospheres)
 3. **FarlanderCraft**, **Coolsa**, **zraffleticket** (Предыдущие разработчики)
 4. **Gemini** (ИИ Напарник 🤖✨)
+
+---
+
+## Gallery 📸
+
+| ![Lush Forest Biosphere](images/forest.png) | ![A Network of Worlds](images/network.png) |
+|:---:|:---:|
+| **Lush Forest Biosphere**<br>A massive, perfectly sealed glass dome containing a dense forest ecosystem. | **Interconnected Biospheres**<br>Explore a vast, fractured world where every dome houses a completely different environment. |
+
+| ![The Ore Sphere](images/ore_sphere.png) | ![Modded Biomes Support](images/modded_biome.png) |
+|:---:|:---:|
+| **The Ore Sphere**<br>A dense, resource-packed mini-sphere floating between the main biospheres. Watch your step! | **Full Mod Compatibility**<br>Custom biomes from third-party mods integrate flawlessly into their own dedicated spheres. |
+
+| ![Cherry Blossom Biosphere](images/cherry_grove.png) | |
+|:---:|:---:|
+| **Cherry Blossom Biosphere**<br>Wooden bridges stretch across the void, connecting the delicate pink landscape to neighboring biomes. | |
