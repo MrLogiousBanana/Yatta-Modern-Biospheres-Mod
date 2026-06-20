@@ -1,0 +1,21 @@
+{
+  "dimensions": {
+    "minecraft:overworld": {
+      "type": "minecraft:overworld",
+      "generator": {
+        "type": "yatta:biosphere",
+        "biome_source": {
+          "type": "yatta:biosphere_biomes",
+          "seed": 0,
+          "sphere_distance": 140,
+          "sphere_radius": 50
+        },
+        "seed": 0,
+        "sphere_distance": 140,
+        "sphere_radius": 50,
+        "lake_radius": 12,
+        "shore_radius": 5
+      }
+    }
+  }
+}

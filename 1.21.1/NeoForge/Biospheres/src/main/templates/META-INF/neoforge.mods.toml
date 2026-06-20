@@ -1,0 +1,29 @@
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
+license="${mod_license}"
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+authors="MrLogiousBanana, Risugami, FarlanderCraft, Coolsa, zraffleticket, Gemini"
+description='''
+Experience a world transformed into interconnected glass domes containing unique biomes, caves, and treacherous lava spheres. A modernized revival of Risugami's classic Biospheres mod.
+
+Original Mod by Risugami
+Maintained by MrLogiousBanana & Gemini
+'''
+
+[[dependencies.${mod_id}]]
+    modId="neoforge"
+    type="required"
+    versionRange="${neo_version}"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    type="required"
+    versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="BOTH"

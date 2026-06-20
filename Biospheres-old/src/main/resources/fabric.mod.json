@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "biospheres",
+  "version": "${version}",
+
+  "name": "Biospheres",
+  "description": "Based off the original mod by Risugami, but implemented with fabric",
+  "authors": [
+    "FarlanderCraft",
+    "Coolsa",
+    "zraffleticket"
+  ],
+  "contact": {
+    "homepage": "https://www.youtube.com/channel/UCNW_V3BfkWXcMtCEIGQyaBA",
+    "sources": "https://github.com/FarLanderCraft/Biospheres"
+  },
+
+  "license": "LGPL-3.0",
+  "icon": "assets/modid/gudenau.png",
+
+  "mixins": [
+    "mixin.biosphere.json"
+  ],
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "xyz.coolsa.biosphere.Biospheres"
+    ],
+    "client": [
+      "xyz.coolsa.biosphere.BiospheresClient"
+    ]
+  },
+
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "fabric": "*",
+    "minecraft": "1.17.x"
+  },
+  "suggests": {
+    "flamingo": "*"
+  },
+  "accessWidener": "biosphere.aw"
+}

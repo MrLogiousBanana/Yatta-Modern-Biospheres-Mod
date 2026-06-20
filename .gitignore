@@ -1,0 +1,44 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+
+# IDEs
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.classpath
+.project
+.settings/
+bin/
+out/
+
+# Logs
+logs/
+*.log
+
+# Minecraft Modding
+run/
+runs/
+.fabric/
+.mixin.out/
+.forge-deps/
+.neoforge-deps/
+
+# OS specific
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Junk
+*.py
+*.js
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+!Release/*.jar
+
+# Ignore old Biospheres if not needed (optional, keeping it commented out for safety)
+# Biospheres-old/
