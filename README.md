@@ -66,6 +66,6 @@ This repository is a monorepo containing source code for multiple Minecraft vers
 |:---:|:---:|
 | **The Ore Sphere**<br>A dense, resource-packed mini-sphere floating between the main biospheres. Watch your step! | **Full Mod Compatibility**<br>Custom biomes from third-party mods integrate flawlessly into their own dedicated spheres. |
 
-| ![Cherry Blossom Biosphere](images/cherry_grove.png) | |
+| ![Cherry Blossom Biosphere](images/cherry_grove.png) | ![Autumn Modded Biome](images/autumn_biome.png) |
 |:---:|:---:|
-| **Cherry Blossom Biosphere**<br>Wooden bridges stretch across the void, connecting the delicate pink landscape to neighboring biomes. | |
+| **Cherry Blossom Biosphere**<br>Wooden bridges stretch across the void, connecting the delicate pink landscape to neighboring biomes. | **Endless Custom Environments**<br>From magical cyan mushrooms to gorgeous autumn forests, Biospheres perfectly adapts to the terrain generation of your installed mods. |
