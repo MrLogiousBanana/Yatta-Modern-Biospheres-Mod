@@ -69,3 +69,7 @@ This repository is a monorepo containing source code for multiple Minecraft vers
 | ![Cherry Blossom Biosphere](images/cherry_grove.png) | ![Autumn Modded Biome](images/autumn_biome.png) |
 |:---:|:---:|
 | **Cherry Blossom Biosphere**<br>Wooden bridges stretch across the void, connecting the delicate pink landscape to neighboring biomes. | **Endless Custom Environments**<br>From magical cyan mushrooms to gorgeous autumn forests, Biospheres perfectly adapts to the terrain generation of your installed mods. |
+
+| ![Tinted Glass Caves](images/cave_sphere.png) | ![A Legendary Mod Reborn](images/reborn_legend.png) |
+|:---:|:---:|
+| **Tinted Glass Caves**<br>A rare, pitch-black biosphere made of Tinted Glass. Sunlight cannot penetrate the dome, allowing hostile mobs to spawn freely. | **Reincarnation of a Legend**<br>A true reincarnation of the legendary classic mod for modern Minecraft versions! Enjoy new biomes—like stunning Cherry Groves—beautifully enclosed in glass. |
