@@ -206,11 +206,33 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 
 	@Override
 	public CompletableFuture<net.minecraft.world.level.chunk.ChunkAccess> fillFromNoise(java.util.concurrent.Executor executor, Blender blender, net.minecraft.world.level.levelgen.RandomState noiseConfig, net.minecraft.world.level.StructureManager structureAccessor, net.minecraft.world.level.chunk.ChunkAccess chunk) {
-		// Capture the real world seed directly from RandomState — legacyLevelSeedSeed() = actual world seed
+		// Capture the real world seed — sample the seeded temperature density function
+		// at 3 non-origin block positions to build a unique per-world seed hash.
 		if (this.actualSeed == null) {
-			this.actualSeed = noiseConfig.legacyLevelSeedSeed();
+			long worldSeed;
+			try {
+				// Primary: reflect on the private legacyLevelSeedSeed field (exact world seed)
+				java.lang.reflect.Field f = net.minecraft.world.level.levelgen.RandomState.class.getDeclaredField("legacyLevelSeedSeed");
+				f.setAccessible(true);
+				worldSeed = f.getLong(noiseConfig);
+			} catch (Exception e1) {
+				try {
+					// Fallback: sample temperature DensityFunction at large non-origin coords
+					net.minecraft.world.level.levelgen.DensityFunction tempFn = noiseConfig.router().temperature();
+					double v1 = tempFn.compute(new net.minecraft.world.level.levelgen.DensityFunction.SinglePointContext(13370, 64, 73310));
+					double v2 = tempFn.compute(new net.minecraft.world.level.levelgen.DensityFunction.SinglePointContext(-73310, 64, -13370));
+					double v3 = tempFn.compute(new net.minecraft.world.level.levelgen.DensityFunction.SinglePointContext(50030, 64, -20030));
+					worldSeed = Double.doubleToRawLongBits(v1)
+							^ Long.rotateLeft(Double.doubleToRawLongBits(v2), 21)
+							^ Long.rotateLeft(Double.doubleToRawLongBits(v3), 42);
+					if (worldSeed == 0L) worldSeed = this.seed ^ 0xDEADBEEFL;
+				} catch (Exception e2) {
+					worldSeed = this.seed ^ 0xCAFEBABEL;
+				}
+			}
+			this.actualSeed = worldSeed;
 			if (this.getBiomeSource() instanceof BiospheresBiomeSource bbs) {
-				bbs.setWorldSeed(this.actualSeed);
+				bbs.setWorldSeed(worldSeed);
 			}
 		}
 		ChunkPos chunkPos = chunk.getPos();
