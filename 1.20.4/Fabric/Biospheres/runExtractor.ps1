@@ -1,2 +1,0 @@
-$classpath = "A:\Документы\Личные проекты\Minecraft Biospheres mod\1.20.4\Fabric\Biospheres\build\classes\java\main" + ";" + (Get-ChildItem "A:\Документы\Личные проекты\Minecraft Biospheres mod\1.20.4\Fabric\Biospheres\.gradle\loom-cache\1.20.4\net.fabricmc.yarn.1_20_4.1.20.4+build.3-v2" -Filter "*.jar" -Recurse | Select-Object -ExpandProperty FullName) -join ";"
-java -cp $classpath xyz.yatta.biosphere.SeedExtractor
