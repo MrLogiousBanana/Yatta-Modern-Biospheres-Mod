@@ -276,13 +276,8 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 
 			if (!seedFound) {
 				try {
-					net.minecraft.world.level.levelgen.DensityFunction tempFn = noiseConfig.router().temperature();
-					double v1 = tempFn.compute(new net.minecraft.world.level.levelgen.DensityFunction.SinglePointContext(13370, 64, 73310));
-					double v2 = tempFn.compute(new net.minecraft.world.level.levelgen.DensityFunction.SinglePointContext(-73310, 64, -13370));
-					double v3 = tempFn.compute(new net.minecraft.world.level.levelgen.DensityFunction.SinglePointContext(50030, 64, -20030));
-					worldSeed = Double.doubleToRawLongBits(v1)
-							^ Long.rotateLeft(Double.doubleToRawLongBits(v2), 21)
-							^ Long.rotateLeft(Double.doubleToRawLongBits(v3), 42);
+					long rsSeed = noiseConfig.getOrCreateRandomFactory(net.minecraft.resources.ResourceLocation.parse("biospheres:seed")).at(0, 0, 0).nextLong();
+					if (rsSeed != 0) worldSeed = rsSeed;
 					if (worldSeed == 0L) worldSeed = this.seed ^ 0xDEADBEEFL;
 				} catch (Exception e2) {
 					worldSeed = this.seed ^ 0xCAFEBABEL;
@@ -491,7 +486,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 		
 		this.chunkRandom.setLargeFeatureSeed(this.getActualSeed(), first.getX() + second.getX(), first.getZ() + second.getZ());
 		
-		if (this.chunkRandom.nextFloat() > 0.40f) { // 40% chance to have an ore sphere
+		if (this.chunkRandom.nextFloat() > 0.20f) { // 20% chance to have an ore sphere
 			return null; 
 		}
 		
@@ -671,6 +666,28 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 						oreSpheres[i] = this.getOreSphereForBridge(centerPos, nesw[i]);
 					}
 				}
+
+				if (isCaveBiome(biome)) {
+					for (int y = this.getMinY(); y < centerPos.getY() + sRadius - 1; y++) {
+						current.set(x, y, z);
+						if (centerPos.distSqr(current) <= (sRadius - 1) * (sRadius - 1)) {
+							BlockState state = chunk.getBlockState(current);
+							if (state.is(Blocks.STONE) || state.is(Blocks.DEEPSLATE)) {
+								if (this.chunkRandom.nextFloat() < 0.006f) {
+									BlockState ore = randomCaveOre(y, state.is(Blocks.DEEPSLATE));
+									chunk.setBlockState(current, ore, false);
+									net.minecraft.core.BlockPos below = current.below();
+									if (below.getY() >= this.getMinY()) {
+										BlockState belowState = chunk.getBlockState(below);
+										if (belowState.is(Blocks.STONE) || belowState.is(Blocks.DEEPSLATE)) {
+											chunk.setBlockState(below, ore, false);
+										}
+									}
+								}
+							}
+						}
+					}
+				}
 				
 				double radialDistance = Math.sqrt(centerPos.distSqr(new net.minecraft.core.Vec3i(x, centerPos.getY(), z)));
 				double noise = this.noiseSampler.getValue(x / 8.0, 0, z / 8.0) / 16;
@@ -790,7 +807,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 				}
 
 				current.set(x, 0, z);
-				this.makeBridges(current, centerPos, nesw, chunk, current, sRadius);
+				this.makeBridges(current, centerPos, nesw, chunk, current, sRadius, oreSpheres);
 				this.makeOreSpheres(current, chunk, current, oreSpheres);
 			}
 		}
@@ -803,20 +820,34 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 			OreSphere ore = oreSpheres[i];
 			if (ore == null) continue;
 			
-			double distToOreCenter = Math.sqrt(Math.pow(ore.center.getX() - x, 2) + Math.pow(ore.center.getZ() - z, 2));
+			double dx = x - ore.center.getX();
+			double dz = z - ore.center.getZ();
+			double distXZSq = dx * dx + dz * dz;
 			
-			if (distToOreCenter <= ore.radius) {
-				double height = Math.sqrt(ore.radius * ore.radius - Math.pow(ore.center.getX() - x, 2) - Math.pow(ore.center.getZ() - z, 2));
-				for (int y = ore.center.getY() - (int) height; y <= ore.center.getY() + height; y++) {
-					double dist3D = Math.sqrt(Math.pow(distToOreCenter, 2) + Math.pow(y - ore.center.getY(), 2));
-					BlockState state;
-					if (dist3D >= ore.radius - 1.0) {
-						state = Blocks.GLASS.defaultBlockState();
-					} else {
-						this.chunkRandom.setSeed(this.getActualSeed() + x * 341873128712L + y * 132897987541L + z * 543897123984L);
-						state = randomOreBlock(x, y, z);
+			if (distXZSq <= ore.radius * ore.radius) {
+				for (int y = ore.center.getY() - ore.radius; y <= ore.center.getY() + ore.radius; y++) {
+					double dy = y - ore.center.getY();
+					double distSq = distXZSq + dy * dy;
+					
+					if (distSq <= ore.radius * ore.radius) {
+						boolean isSurface = false;
+						double rSq = ore.radius * ore.radius;
+						if ((dx+1)*(dx+1) + dy*dy + dz*dz > rSq) isSurface = true;
+						else if ((dx-1)*(dx-1) + dy*dy + dz*dz > rSq) isSurface = true;
+						else if (dx*dx + (dy+1)*(dy+1) + dz*dz > rSq) isSurface = true;
+						else if (dx*dx + (dy-1)*(dy-1) + dz*dz > rSq) isSurface = true;
+						else if (dx*dx + dy*dy + (dz+1)*(dz+1) > rSq) isSurface = true;
+						else if (dx*dx + dy*dy + (dz-1)*(dz-1) > rSq) isSurface = true;
+						
+						BlockState state;
+						if (isSurface) {
+							state = net.minecraft.world.level.block.Blocks.GLASS.defaultBlockState();
+						} else {
+							this.chunkRandom.setSeed(this.getActualSeed() + x * 341873128712L + y * 132897987541L + z * 543897123984L);
+							state = randomOreBlock(x, y, z);
+						}
+						this.safeSetBlock(chunk, current, x, y, z, state);
 					}
-					this.safeSetBlock(chunk, current, x, y, z, state);
 				}
 			}
 			
@@ -828,13 +859,15 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 					int minZ = Math.min(ore.bridgeAttachPoint.getZ(), ore.center.getZ());
 					int maxZ = Math.max(ore.bridgeAttachPoint.getZ(), ore.center.getZ());
 					if (z >= minZ && z <= maxZ) {
-						if (distToOreCenter > ore.radius) {
+						if (distXZSq > ore.radius * ore.radius) {
 							double t = (double)(z - ore.bridgeAttachPoint.getZ()) / (ore.center.getZ() - ore.bridgeAttachPoint.getZ());
 							int y = (int) Math.round(ore.bridgeAttachPoint.getY() + t * (ore.center.getY() - ore.bridgeAttachPoint.getY()));
 							
 							this.chunkRandom.setLargeFeatureSeed(this.seed, x, z);
 							if (this.chunkRandom.nextFloat() > 0.15f) {
-								this.safeSetBlock(chunk, current, x, y, z, this.defaultBridge);
+								this.safeSetBlock(chunk, current, x, y - 1, z, this.defaultBridge);
+								this.safeSetBlock(chunk, current, x, y, z, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+								this.safeSetBlock(chunk, current, x, y + 1, z, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
 							}
 						}
 					}
@@ -844,13 +877,15 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 					int minX = Math.min(ore.bridgeAttachPoint.getX(), ore.center.getX());
 					int maxX = Math.max(ore.bridgeAttachPoint.getX(), ore.center.getX());
 					if (x >= minX && x <= maxX) {
-						if (distToOreCenter > ore.radius) {
+						if (distXZSq > ore.radius * ore.radius) {
 							double t = (double)(x - ore.bridgeAttachPoint.getX()) / (ore.center.getX() - ore.bridgeAttachPoint.getX());
 							int y = (int) Math.round(ore.bridgeAttachPoint.getY() + t * (ore.center.getY() - ore.bridgeAttachPoint.getY()));
 							
 							this.chunkRandom.setLargeFeatureSeed(this.seed, x, z);
 							if (this.chunkRandom.nextFloat() > 0.15f) {
-								this.safeSetBlock(chunk, current, x, y, z, this.defaultBridge);
+								this.safeSetBlock(chunk, current, x, y - 1, z, this.defaultBridge);
+								this.safeSetBlock(chunk, current, x, y, z, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
+								this.safeSetBlock(chunk, current, x, y + 1, z, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState());
 							}
 						}
 					}
@@ -871,7 +906,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 		}
 	}
 
-	public void makeBridges(BlockPos pos, BlockPos centerPos, BlockPos[] nesw, net.minecraft.world.level.chunk.ChunkAccess chunk, net.minecraft.core.BlockPos.MutableBlockPos current, double sRadius) {
+	public void makeBridges(BlockPos pos, BlockPos centerPos, BlockPos[] nesw, net.minecraft.world.level.chunk.ChunkAccess chunk, net.minecraft.core.BlockPos.MutableBlockPos current, double sRadius, OreSphere[] oreSpheres) {
 		int cx = centerPos.getX();
 		int cy = centerPos.getY();
 		int cz = centerPos.getZ();
@@ -933,7 +968,66 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 				else if (i == 2 && (z < cz + (int)sRadius || z > nesw[i].getZ() - (int)targetRadius)) clearOnly = true;
 				else if (i == 3 && (z > cz - (int)sRadius || z < nesw[i].getZ() + (int)targetRadius)) clearOnly = true;
 				
-				this.fillBridgeSlice(new BlockPos(x, finalY, z), centerPos, chunk, current, isOnXAxis, isPositive, clearOnly);
+				boolean cn1 = true, cp1 = true, cn2 = true, cp2 = true;
+				if (i == 0) {
+					if (x == cx + (int)sRadius) { cn1 = false; cn2 = false; }
+					if (x == nesw[i].getX() - (int)targetRadius) { cp1 = false; cp2 = false; }
+					if (oreSpheres != null && oreSpheres[i] != null) {
+						int ax = oreSpheres[i].bridgeAttachPoint.getX();
+						int az = oreSpheres[i].bridgeAttachPoint.getZ();
+						if (az == cz - 2) {
+							if (x == ax - 2) cp1 = false;
+							if (x == ax + 2) cn1 = false;
+						} else if (az == cz + 2) {
+							if (x == ax - 2) cp2 = false;
+							if (x == ax + 2) cn2 = false;
+						}
+					}
+				} else if (i == 1) {
+					if (x == cx - (int)sRadius) { cp1 = false; cp2 = false; }
+					if (x == nesw[i].getX() + (int)targetRadius) { cn1 = false; cn2 = false; }
+					if (oreSpheres != null && oreSpheres[i] != null) {
+						int ax = oreSpheres[i].bridgeAttachPoint.getX();
+						int az = oreSpheres[i].bridgeAttachPoint.getZ();
+						if (az == cz - 2) {
+							if (x == ax - 2) cp1 = false;
+							if (x == ax + 2) cn1 = false;
+						} else if (az == cz + 2) {
+							if (x == ax - 2) cp2 = false;
+							if (x == ax + 2) cn2 = false;
+						}
+					}
+				} else if (i == 2) {
+					if (z == cz + (int)sRadius) { cn1 = false; cn2 = false; }
+					if (z == nesw[i].getZ() - (int)targetRadius) { cp1 = false; cp2 = false; }
+					if (oreSpheres != null && oreSpheres[i] != null) {
+						int ax = oreSpheres[i].bridgeAttachPoint.getX();
+						int az = oreSpheres[i].bridgeAttachPoint.getZ();
+						if (ax == cx - 2) {
+							if (z == az - 2) cp1 = false;
+							if (z == az + 2) cn1 = false;
+						} else if (ax == cx + 2) {
+							if (z == az - 2) cp2 = false;
+							if (z == az + 2) cn2 = false;
+						}
+					}
+				} else if (i == 3) {
+					if (z == cz - (int)sRadius) { cp1 = false; cp2 = false; }
+					if (z == nesw[i].getZ() + (int)targetRadius) { cn1 = false; cn2 = false; }
+					if (oreSpheres != null && oreSpheres[i] != null) {
+						int ax = oreSpheres[i].bridgeAttachPoint.getX();
+						int az = oreSpheres[i].bridgeAttachPoint.getZ();
+						if (ax == cx - 2) {
+							if (z == az - 2) cp1 = false;
+							if (z == az + 2) cn1 = false;
+						} else if (ax == cx + 2) {
+							if (z == az - 2) cp2 = false;
+							if (z == az + 2) cn2 = false;
+						}
+					}
+				}
+				
+				this.fillBridgeSlice(new BlockPos(x, finalY, z), centerPos, chunk, current, isOnXAxis, isPositive, clearOnly, cn1, cp1, cn2, cp2);
 			}
 		}
 	}
@@ -944,7 +1038,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 		}
 	}
 
-	public void fillBridgeSlice(BlockPos pos, BlockPos centerPos, net.minecraft.world.level.chunk.ChunkAccess chunk, net.minecraft.core.BlockPos.MutableBlockPos current, boolean isOnXAxis, boolean isPositive, boolean clearOnly) {
+	public void fillBridgeSlice(BlockPos pos, BlockPos centerPos, net.minecraft.world.level.chunk.ChunkAccess chunk, net.minecraft.core.BlockPos.MutableBlockPos current, boolean isOnXAxis, boolean isPositive, boolean clearOnly, boolean cn1, boolean cp1, boolean cn2, boolean cp2) {
 		int x = pos.getX();
 		int y = pos.getY();
 		int z = pos.getZ();
@@ -976,18 +1070,30 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 			
 			if (!clearOnly) {
 				if (isOnXAxis) {
-					if (z == cz + 2 || z == cz - 2) {
+					if (z == cz - 2) {
 						BlockState edge = this.defaultEdge;
 						if (edge.getBlock() instanceof net.minecraft.world.level.block.FenceBlock) {
-							edge = edge.setValue(net.minecraft.world.level.block.FenceBlock.EAST, true).setValue(net.minecraft.world.level.block.FenceBlock.WEST, true);
+							edge = edge.setValue(net.minecraft.world.level.block.FenceBlock.EAST, cp1).setValue(net.minecraft.world.level.block.FenceBlock.WEST, cn1);
+						}
+						this.safeSetBlock(chunk, current, x, y, z, edge);
+					} else if (z == cz + 2) {
+						BlockState edge = this.defaultEdge;
+						if (edge.getBlock() instanceof net.minecraft.world.level.block.FenceBlock) {
+							edge = edge.setValue(net.minecraft.world.level.block.FenceBlock.EAST, cp2).setValue(net.minecraft.world.level.block.FenceBlock.WEST, cn2);
 						}
 						this.safeSetBlock(chunk, current, x, y, z, edge);
 					}
 				} else {
-					if (x == cx + 2 || x == cx - 2) {
+					if (x == cx - 2) {
 						BlockState edge = this.defaultEdge;
 						if (edge.getBlock() instanceof net.minecraft.world.level.block.FenceBlock) {
-							edge = edge.setValue(net.minecraft.world.level.block.FenceBlock.NORTH, true).setValue(net.minecraft.world.level.block.FenceBlock.SOUTH, true);
+							edge = edge.setValue(net.minecraft.world.level.block.FenceBlock.SOUTH, cp1).setValue(net.minecraft.world.level.block.FenceBlock.NORTH, cn1);
+						}
+						this.safeSetBlock(chunk, current, x, y, z, edge);
+					} else if (x == cx + 2) {
+						BlockState edge = this.defaultEdge;
+						if (edge.getBlock() instanceof net.minecraft.world.level.block.FenceBlock) {
+							edge = edge.setValue(net.minecraft.world.level.block.FenceBlock.SOUTH, cp2).setValue(net.minecraft.world.level.block.FenceBlock.NORTH, cn2);
 						}
 						this.safeSetBlock(chunk, current, x, y, z, edge);
 					}
@@ -1091,7 +1197,25 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 }
 
 
+
+	private BlockState randomCaveOre(int y, boolean deepslate) {
+		float r = this.chunkRandom.nextFloat();
+		if (y < 0) {
+			if (r < 0.1f) return deepslate ? Blocks.DEEPSLATE_DIAMOND_ORE.defaultBlockState() : Blocks.DIAMOND_ORE.defaultBlockState();
+			if (r < 0.3f) return deepslate ? Blocks.DEEPSLATE_GOLD_ORE.defaultBlockState() : Blocks.GOLD_ORE.defaultBlockState();
+			if (r < 0.6f) return deepslate ? Blocks.DEEPSLATE_REDSTONE_ORE.defaultBlockState() : Blocks.REDSTONE_ORE.defaultBlockState();
+			if (r < 0.8f) return deepslate ? Blocks.DEEPSLATE_LAPIS_ORE.defaultBlockState() : Blocks.LAPIS_ORE.defaultBlockState();
+			return deepslate ? Blocks.DEEPSLATE_IRON_ORE.defaultBlockState() : Blocks.IRON_ORE.defaultBlockState();
+		} else {
+			if (r < 0.3f) return Blocks.COAL_ORE.defaultBlockState();
+			if (r < 0.6f) return Blocks.IRON_ORE.defaultBlockState();
+			if (r < 0.8f) return Blocks.COPPER_ORE.defaultBlockState();
+			return Blocks.GOLD_ORE.defaultBlockState();
+		}
+	}
 }
+
+
 
 
 
