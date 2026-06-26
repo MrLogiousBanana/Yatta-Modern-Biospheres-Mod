@@ -802,22 +802,22 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 			boolean isPositive = false;
 			boolean onBridge = false;
 
-			if (i == 0 && z >= cz - 2 && z <= cz + 2 && x >= cx + (int)sRadius - 1 && x <= nesw[i].getX() - (int)targetRadius + 1) {
+			if (i == 0 && z >= cz - 2 && z <= cz + 2 && x >= cx + (int)sRadius && x <= nesw[i].getX() - (int)targetRadius) {
 				t = (x - (cx + sRadius)) / L;
 				isOnXAxis = true;
 				isPositive = true;
 				onBridge = true;
-			} else if (i == 1 && z >= cz - 2 && z <= cz + 2 && x <= cx - (int)sRadius + 1 && x >= nesw[i].getX() + (int)targetRadius - 1) {
+			} else if (i == 1 && z >= cz - 2 && z <= cz + 2 && x <= cx - (int)sRadius && x >= nesw[i].getX() + (int)targetRadius) {
 				t = ((cx - sRadius) - x) / L;
 				isOnXAxis = true;
 				isPositive = false;
 				onBridge = true;
-			} else if (i == 2 && x >= cx - 2 && x <= cx + 2 && z >= cz + (int)sRadius - 1 && z <= nesw[i].getZ() - (int)targetRadius + 1) {
+			} else if (i == 2 && x >= cx - 2 && x <= cx + 2 && z >= cz + (int)sRadius && z <= nesw[i].getZ() - (int)targetRadius) {
 				t = (z - (cz + sRadius)) / L;
 				isOnXAxis = false;
 				isPositive = true;
 				onBridge = true;
-			} else if (i == 3 && x >= cx - 2 && x <= cx + 2 && z <= cz - (int)sRadius + 1 && z >= nesw[i].getZ() + (int)targetRadius - 1) {
+			} else if (i == 3 && x >= cx - 2 && x <= cx + 2 && z <= cz - (int)sRadius && z >= nesw[i].getZ() + (int)targetRadius) {
 				t = ((cz - sRadius) - z) / L;
 				isOnXAxis = false;
 				isPositive = false;
