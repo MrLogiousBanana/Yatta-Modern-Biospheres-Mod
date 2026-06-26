@@ -818,7 +818,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 				isPositive = false;
 			}
 
-			if (t >= -1.5 / L && t <= 1.0 + 1.5 / L) {
+			if (t >= 0.0 && t <= 1.0) {
 				int attachX1 = cx, attachZ1 = cz;
 				int attachX2 = nesw[i].getX(), attachZ2 = nesw[i].getZ();
 				
