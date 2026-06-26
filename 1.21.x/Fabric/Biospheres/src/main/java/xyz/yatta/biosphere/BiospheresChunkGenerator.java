@@ -60,6 +60,20 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 	protected double generatedSphereHeight;
 	private Long actualSeed = null;
 
+	private long extractSeedFromRandomState(Object randomState) {
+		if (randomState == null) return 0;
+		for (java.lang.reflect.Field f : randomState.getClass().getDeclaredFields()) {
+			if (f.getType() == long.class) {
+				try {
+					f.setAccessible(true);
+					long val = f.getLong(randomState);
+					if (val != 0) return val;
+				} catch (Exception ignored) {}
+			}
+		}
+		return 0;
+	}
+
 	private long getActualSeed() {
 		return this.actualSeed != null ? this.actualSeed : this.seed;
 	}
@@ -176,8 +190,77 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 		return random.nextDouble() * (maxRadius - minRadius) + minRadius;
 	}
 
+	private long extractSeedFromStructureAccessor(net.minecraft.world.gen.StructureAccessor sm) {
+		if (sm == null) return 0;
+		try {
+			for (java.lang.reflect.Field f : sm.getClass().getDeclaredFields()) {
+				try {
+					f.setAccessible(true);
+					Object obj = f.get(sm);
+					if (obj instanceof net.minecraft.world.ServerWorldAccess sla) {
+						long s = sla.toServerWorld().getSeed();
+						if (s != 0) return s;
+					}
+				} catch (Exception ignored) {}
+			}
+		} catch (Exception e) {}
+		return 0;
+	}
+
+	@Override
+	public java.util.concurrent.CompletableFuture<net.minecraft.world.chunk.Chunk> populateBiomes(net.minecraft.world.gen.noise.NoiseConfig noiseConfig, net.minecraft.world.gen.chunk.Blender blender, net.minecraft.world.gen.StructureAccessor structureAccessor, net.minecraft.world.chunk.Chunk chunk) {
+		if (this.actualSeed == null) {
+			long s = extractSeedFromStructureAccessor(structureAccessor);
+			if (s != 0) {
+				this.actualSeed = s;
+				if (this.getBiomeSource() instanceof BiospheresBiomeSource bbs) {
+					bbs.setWorldSeed(s);
+				}
+			}
+		}
+		return super.populateBiomes(noiseConfig, blender, structureAccessor, chunk);
+	}
+
 	@Override
 	public CompletableFuture<Chunk> populateNoise(Blender blender, NoiseConfig noiseConfig, StructureAccessor structureAccessor, Chunk chunk) {
+		if (this.actualSeed == null) {
+			long worldSeed = this.seed;
+			boolean seedFound = false;
+			if (this.getBiomeSource() instanceof BiospheresBiomeSource bbs) {
+				if (bbs.hasActualSeed()) {
+					worldSeed = bbs.getActualSeed();
+					seedFound = true;
+				}
+			}
+			
+			if (!seedFound) {
+				long s = extractSeedFromStructureAccessor(structureAccessor);
+				if (s != 0) {
+					worldSeed = s;
+					seedFound = true;
+				}
+			}
+
+			if (!seedFound) {
+				try {
+					net.minecraft.world.gen.densityfunction.DensityFunction tempFn = noiseConfig.getNoiseRouter().temperature();
+					double v1 = tempFn.sample(new net.minecraft.world.gen.densityfunction.DensityFunction.UnblendedNoisePos(13370, 64, 73310));
+					double v2 = tempFn.sample(new net.minecraft.world.gen.densityfunction.DensityFunction.UnblendedNoisePos(-73310, 64, -13370));
+					double v3 = tempFn.sample(new net.minecraft.world.gen.densityfunction.DensityFunction.UnblendedNoisePos(50030, 64, -20030));
+					worldSeed = Double.doubleToRawLongBits(v1)
+							^ Long.rotateLeft(Double.doubleToRawLongBits(v2), 21)
+							^ Long.rotateLeft(Double.doubleToRawLongBits(v3), 42);
+					if (worldSeed == 0L) worldSeed = this.seed ^ 0xDEADBEEFL;
+				} catch (Exception e2) {
+					worldSeed = this.seed ^ 0xCAFEBABEL;
+				}
+			}
+			this.actualSeed = worldSeed;
+			if (this.getBiomeSource() instanceof BiospheresBiomeSource bbs) {
+				bbs.setWorldSeed(this.actualSeed);
+			}
+		}
+
 		ChunkPos chunkPos = chunk.getPos();
 		BlockPos.Mutable current = new BlockPos.Mutable();
 		int xPos = chunkPos.getStartX();
@@ -668,7 +751,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 	}
 
 	private int getSurfaceHeightAt(int realX, int realZ, int cy) {
-		double noise = this.noiseSampler.getValue(realX / 8.0, 0, realZ / 8.0) / 16.0;
+		double noise = this.noiseSampler.sample(realX / 8.0, 0, realZ / 8.0) / 16.0;
 		if (noise >= 0) {
 			return cy - 1;
 		} else {
@@ -696,22 +779,22 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 			boolean isPositive = false;
 			boolean onBridge = false;
 
-			if (i == 0 && z >= cz - 2 && z <= cz + 2 && x >= cx + (int)sRadius && x <= nesw[i].getX() - (int)targetRadius) {
+			if (i == 0 && z >= cz - 2 && z <= cz + 2 && x >= cx + (int)sRadius - 3 && x <= nesw[i].getX() - (int)targetRadius + 3) {
 				t = (x - (cx + sRadius)) / L;
 				isOnXAxis = true;
 				isPositive = true;
 				onBridge = true;
-			} else if (i == 1 && z >= cz - 2 && z <= cz + 2 && x <= cx - (int)sRadius && x >= nesw[i].getX() + (int)targetRadius) {
+			} else if (i == 1 && z >= cz - 2 && z <= cz + 2 && x <= cx - (int)sRadius + 3 && x >= nesw[i].getX() + (int)targetRadius - 3) {
 				t = ((cx - sRadius) - x) / L;
 				isOnXAxis = true;
 				isPositive = false;
 				onBridge = true;
-			} else if (i == 2 && x >= cx - 2 && x <= cx + 2 && z >= cz + (int)sRadius && z <= nesw[i].getZ() - (int)targetRadius) {
+			} else if (i == 2 && x >= cx - 2 && x <= cx + 2 && z >= cz + (int)sRadius - 3 && z <= nesw[i].getZ() - (int)targetRadius + 3) {
 				t = (z - (cz + sRadius)) / L;
 				isOnXAxis = false;
 				isPositive = true;
 				onBridge = true;
-			} else if (i == 3 && x >= cx - 2 && x <= cx + 2 && z <= cz - (int)sRadius && z >= nesw[i].getZ() + (int)targetRadius) {
+			} else if (i == 3 && x >= cx - 2 && x <= cx + 2 && z <= cz - (int)sRadius + 3 && z >= nesw[i].getZ() + (int)targetRadius - 3) {
 				t = ((cz - sRadius) - z) / L;
 				isOnXAxis = false;
 				isPositive = false;
@@ -736,6 +819,10 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 				int finalY = (int) Math.round(baseY - sag);
 				
 				boolean clearOnly = false;
+				if (i == 0 && (x < cx + (int)sRadius || x > nesw[i].getX() - (int)targetRadius)) clearOnly = true;
+				else if (i == 1 && (x > cx - (int)sRadius || x < nesw[i].getX() + (int)targetRadius)) clearOnly = true;
+				else if (i == 2 && (z < cz + (int)sRadius || z > nesw[i].getZ() - (int)targetRadius)) clearOnly = true;
+				else if (i == 3 && (z > cz - (int)sRadius || z < nesw[i].getZ() + (int)targetRadius)) clearOnly = true;
 				
 				this.fillBridgeSlice(new BlockPos(x, finalY, z), centerPos, chunk, current, isOnXAxis, isPositive, clearOnly);
 			}
@@ -763,10 +850,20 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 			if (!clearOnly) {
 				this.safeSetBlock(chunk, current, x, y - 1, z, this.defaultBridge);
 			}
-			this.safeSetBlock(chunk, current, x, y, z, Blocks.AIR.getDefaultState());
-			this.safeSetBlock(chunk, current, x, y + 1, z, Blocks.AIR.getDefaultState());
-			this.safeSetBlock(chunk, current, x, y + 2, z, Blocks.AIR.getDefaultState());
-			this.safeSetBlock(chunk, current, x, y + 3, z, Blocks.AIR.getDefaultState());
+			
+			if (clearOnly) {
+				for (int dy = 0; dy < 4; dy++) {
+					net.minecraft.block.BlockState bs = chunk.getBlockState(new net.minecraft.util.math.BlockPos(x, y + dy, z));
+					if (bs.isOf(net.minecraft.block.Blocks.GLASS)) {
+						this.safeSetBlock(chunk, current, x, y + dy, z, net.minecraft.block.Blocks.AIR.getDefaultState());
+					}
+				}
+			} else {
+				this.safeSetBlock(chunk, current, x, y, z, net.minecraft.block.Blocks.AIR.getDefaultState());
+				this.safeSetBlock(chunk, current, x, y + 1, z, net.minecraft.block.Blocks.AIR.getDefaultState());
+				this.safeSetBlock(chunk, current, x, y + 2, z, net.minecraft.block.Blocks.AIR.getDefaultState());
+				this.safeSetBlock(chunk, current, x, y + 3, z, net.minecraft.block.Blocks.AIR.getDefaultState());
+			}
 			
 			if (!clearOnly) {
 				if (isOnXAxis) {

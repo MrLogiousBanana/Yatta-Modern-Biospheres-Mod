@@ -42,7 +42,11 @@ public class BiospheresBiomeSource extends BiomeSource {
 		if (this.actualSeed == null && s != 0) this.actualSeed = s;
 	}
 
-	private long getActualSeed() {
+	public boolean hasActualSeed() {
+		return this.actualSeed != null;
+	}
+
+	public long getActualSeed() {
 		return this.actualSeed != null ? this.actualSeed : this.seed;
 	}
 
@@ -113,6 +117,16 @@ public class BiospheresBiomeSource extends BiomeSource {
 
 	@Override
 	public Holder<Biome> getNoiseBiome(int x, int y, int z, Climate.Sampler noise) {
+		if (this.actualSeed == null) {
+			net.minecraft.world.level.biome.Climate.TargetPoint tp1 = noise.sample(1337, 64, 7331);
+			net.minecraft.world.level.biome.Climate.TargetPoint tp2 = noise.sample(-7331, 64, -1337);
+			net.minecraft.world.level.biome.Climate.TargetPoint tp3 = noise.sample(5003, 64, -2003);
+			long seedHash = tp1.temperature() ^ Long.rotateLeft(tp2.humidity(), 21) ^ Long.rotateLeft(tp3.continentalness(), 42);
+			if (seedHash != 0) {
+				this.setWorldSeed(seedHash);
+			}
+		}
+
 		int centerX = (int) Math.round(x * 4 / (double) this.sphereDistance) * this.sphereDistance;
 		int centerZ = (int) Math.round(z * 4 / (double) this.sphereDistance) * this.sphereDistance;
 		double currentRadius = this.getSphereRadius(centerX, centerZ);
