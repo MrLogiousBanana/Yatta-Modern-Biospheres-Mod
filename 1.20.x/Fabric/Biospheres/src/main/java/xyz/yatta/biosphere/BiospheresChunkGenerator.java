@@ -587,7 +587,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 				}
 				
 				double radialDistance = Math.sqrt(centerPos.getSquaredDistance(x, centerPos.getY(), z));
-				double noise = this.noiseSampler.sample(x / 8.0, 0, z / 8.0, 1 / 16.0, 1 / 16.0, false) / 8;
+				double noise = this.noiseSampler.sample(x / 8.0, 0, z / 8.0, 1 / 16.0, 1 / 16.0, false) / 16;
 				
 				if (radialDistance <= sRadius + 16) {
 					double sphereHeight = Math.sqrt(sRadius * sRadius
@@ -648,7 +648,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 									chunk.setBlockState(current, Blocks.AIR.getDefaultState(), false);
 								}
 							}
-						} else if (newRadialDistance > sRadius - 1.2) {
+						} else if (newRadialDistance > sRadius - 1.0) {
 							current.set(x, y, z);
 							double noiseTemp = (noise + y / centerPos.getY());
 							BlockState expected;
@@ -724,7 +724,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 				for (int y = ore.center.getY() - (int) height; y <= ore.center.getY() + height; y++) {
 					double dist3D = Math.sqrt(Math.pow(distToOreCenter, 2) + Math.pow(y - ore.center.getY(), 2));
 					BlockState state;
-					if (dist3D >= ore.radius - 1.2) {
+					if (dist3D >= ore.radius - 1.0) {
 						state = Blocks.GLASS.getDefaultState();
 					} else {
 						this.chunkRandom.setSeed(this.getActualSeed() + x * 341873128712L + y * 132897987541L + z * 543897123984L);
