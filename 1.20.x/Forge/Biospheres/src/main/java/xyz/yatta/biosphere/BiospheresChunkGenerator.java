@@ -239,17 +239,24 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 	public java.util.concurrent.CompletableFuture<net.minecraft.world.level.chunk.ChunkAccess> createBiomes(java.util.concurrent.Executor executor, net.minecraft.world.level.levelgen.RandomState randomState, Blender blender, net.minecraft.world.level.StructureManager structureManager, net.minecraft.world.level.chunk.ChunkAccess chunkAccess) {
 		if (this.actualSeed == null) {
 			long s = extractSeedFromStructureManager(structureManager);
+			System.out.println("[BIOSPHERES DEBUG] Seed from StructureManager: " + s);
 			if (s == 0) {
 				try {
 					long rsSeed = randomState.getOrCreateRandomFactory(new net.minecraft.resources.ResourceLocation("biospheres", "seed")).at(0, 0, 0).nextLong();
+					System.out.println("[BIOSPHERES DEBUG] Seed from RandomState Factory: " + rsSeed);
 					if (rsSeed != 0) s = rsSeed;
-				} catch (Exception ignored) {}
+				} catch (Exception e) {
+					System.out.println("[BIOSPHERES DEBUG] Exception getting seed from RandomState: " + e.getMessage());
+				}
 			}
 			if (s != 0) {
 				this.actualSeed = s;
 				if (this.getBiomeSource() instanceof BiospheresBiomeSource bbs) {
 					bbs.setWorldSeed(s);
 				}
+				System.out.println("[BIOSPHERES DEBUG] Final selected Seed: " + s);
+			} else {
+				System.out.println("[BIOSPHERES DEBUG] SEED IS STILL ZERO!");
 			}
 		}
 		return super.createBiomes(executor, randomState, blender, structureManager, chunkAccess);
@@ -285,13 +292,9 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 
 			if (!seedFound) {
 				try {
-					net.minecraft.world.level.levelgen.DensityFunction tempFn = noiseConfig.router().temperature();
-					double v1 = tempFn.compute(new net.minecraft.world.level.levelgen.DensityFunction.SinglePointContext(13370, 64, 73310));
-					double v2 = tempFn.compute(new net.minecraft.world.level.levelgen.DensityFunction.SinglePointContext(-73310, 64, -13370));
-					double v3 = tempFn.compute(new net.minecraft.world.level.levelgen.DensityFunction.SinglePointContext(50030, 64, -20030));
-					worldSeed = Double.doubleToRawLongBits(v1)
-							^ Long.rotateLeft(Double.doubleToRawLongBits(v2), 21)
-							^ Long.rotateLeft(Double.doubleToRawLongBits(v3), 42);
+					long rsSeed = noiseConfig.getOrCreateRandomFactory(new net.minecraft.resources.ResourceLocation("biospheres", "seed")).at(0, 0, 0).nextLong();
+					System.out.println("[BIOSPHERES DEBUG] fillFromNoise Seed from RandomState Factory: " + rsSeed);
+					if (rsSeed != 0) worldSeed = rsSeed;
 					if (worldSeed == 0L) worldSeed = this.seed ^ 0xDEADBEEFL;
 				} catch (Exception e2) {
 					worldSeed = this.seed ^ 0xCAFEBABEL;

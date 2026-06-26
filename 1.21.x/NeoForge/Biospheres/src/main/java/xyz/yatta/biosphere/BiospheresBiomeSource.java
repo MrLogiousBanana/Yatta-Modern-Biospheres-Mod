@@ -139,7 +139,7 @@ public class BiospheresBiomeSource extends BiomeSource {
 
 	public double getSphereRadius(int centerX, int centerZ) {
 		double maxRadius = this.sphereRadius * 1.1;
-		double minRadius = this.sphereRadius * 0.8;
+		double minRadius = this.sphereRadius * 0.4;
 		java.util.Random random = new java.util.Random(this.getActualSeed() + 1L + (long) centerX * 341873128712L + (long) centerZ * 132897987541L);
 		return random.nextDouble() * (maxRadius - minRadius) + minRadius;
 	}
