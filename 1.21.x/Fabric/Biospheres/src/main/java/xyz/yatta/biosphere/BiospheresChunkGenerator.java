@@ -667,6 +667,18 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 		}
 	}
 
+	private int getSurfaceHeightAt(int realX, int realZ, int cy) {
+		double noise = this.noiseSampler.getValue(realX / 8.0, 0, realZ / 8.0) / 16.0;
+		if (noise >= 0) {
+			return cy - 1;
+		} else {
+			double exactY = cy / (noise + 1.0);
+			int maxIntY = (int) Math.ceil(exactY) - 1;
+			if (maxIntY == exactY) maxIntY--;
+			return maxIntY;
+		}
+	}
+
 	public void makeBridges(BlockPos pos, BlockPos centerPos, BlockPos[] nesw, Chunk chunk, BlockPos.Mutable current, double sRadius) {
 		int cx = centerPos.getX();
 		int cy = centerPos.getY();
@@ -701,13 +713,24 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 				isPositive = false;
 			}
 
-			if (t >= -4.0 / L && t <= 1.0 + 4.0 / L) {
+			if (t >= -1.5 / L && t <= 1.0 + 1.5 / L) {
+				int attachX1 = cx, attachZ1 = cz;
+				int attachX2 = nesw[i].getX(), attachZ2 = nesw[i].getZ();
+				
+				if (i == 0) { attachX1 += (int)sRadius; attachX2 -= (int)targetRadius; }
+				else if (i == 1) { attachX1 -= (int)sRadius; attachX2 += (int)targetRadius; }
+				else if (i == 2) { attachZ1 += (int)sRadius; attachZ2 -= (int)targetRadius; }
+				else if (i == 3) { attachZ1 -= (int)sRadius; attachZ2 += (int)targetRadius; }
+				
+				int h1 = this.getSurfaceHeightAt(attachX1, attachZ1, cy);
+				int h2 = this.getSurfaceHeightAt(attachX2, attachZ2, nesw[i].getY());
+				
 				double effectiveT = Math.max(0, Math.min(1, t));
-				double baseY = (cy + 1) + effectiveT * (nesw[i].getY() - cy);
+				double baseY = (h1 + 1) + effectiveT * (h2 - h1);
 				double sag = Math.sin(effectiveT * Math.PI) * (L / 12.0);
 				int finalY = (int) Math.round(baseY - sag);
 				
-				boolean clearOnly = (t < -1.5 / L || t > 1.0 + 1.5 / L);
+				boolean clearOnly = false;
 				
 				this.fillBridgeSlice(new BlockPos(x, finalY, z), centerPos, chunk, current, isOnXAxis, isPositive, clearOnly);
 			}
