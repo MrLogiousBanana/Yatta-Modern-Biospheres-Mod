@@ -211,6 +211,12 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 	public java.util.concurrent.CompletableFuture<net.minecraft.world.chunk.Chunk> populateBiomes(net.minecraft.world.gen.noise.NoiseConfig noiseConfig, net.minecraft.world.gen.chunk.Blender blender, net.minecraft.world.gen.StructureAccessor structureAccessor, net.minecraft.world.chunk.Chunk chunk) {
 		if (this.actualSeed == null) {
 			long s = extractSeedFromStructureAccessor(structureAccessor);
+			if (s == 0) {
+				try {
+					long rsSeed = noiseConfig.getOrCreateRandomFactory(net.minecraft.util.Identifier.of("biospheres", "seed")).at(0, 0, 0).nextLong();
+					if (rsSeed != 0) s = rsSeed;
+				} catch (Exception ignored) {}
+			}
 			if (s != 0) {
 				this.actualSeed = s;
 				if (this.getBiomeSource() instanceof BiospheresBiomeSource bbs) {
@@ -235,6 +241,12 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 			
 			if (!seedFound) {
 				long s = extractSeedFromStructureAccessor(structureAccessor);
+				if (s == 0) {
+					try {
+						long rsSeed = noiseConfig.getOrCreateRandomFactory(net.minecraft.util.Identifier.of("biospheres", "seed")).at(0, 0, 0).nextLong();
+						if (rsSeed != 0) s = rsSeed;
+					} catch (Exception ignored) {}
+				}
 				if (s != 0) {
 					worldSeed = s;
 					seedFound = true;

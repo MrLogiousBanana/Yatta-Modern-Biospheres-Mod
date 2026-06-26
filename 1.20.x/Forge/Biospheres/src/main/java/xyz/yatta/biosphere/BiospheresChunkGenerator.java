@@ -239,6 +239,12 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 	public java.util.concurrent.CompletableFuture<net.minecraft.world.level.chunk.ChunkAccess> createBiomes(java.util.concurrent.Executor executor, net.minecraft.world.level.levelgen.RandomState randomState, Blender blender, net.minecraft.world.level.StructureManager structureManager, net.minecraft.world.level.chunk.ChunkAccess chunkAccess) {
 		if (this.actualSeed == null) {
 			long s = extractSeedFromStructureManager(structureManager);
+			if (s == 0) {
+				try {
+					long rsSeed = randomState.getOrCreateRandomFactory(new net.minecraft.resources.ResourceLocation("biospheres", "seed")).at(0, 0, 0).nextLong();
+					if (rsSeed != 0) s = rsSeed;
+				} catch (Exception ignored) {}
+			}
 			if (s != 0) {
 				this.actualSeed = s;
 				if (this.getBiomeSource() instanceof BiospheresBiomeSource bbs) {
@@ -265,6 +271,12 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 			
 			if (!seedFound) {
 				long s = extractSeedFromStructureManager(structureAccessor);
+				if (s == 0) {
+					try {
+						long rsSeed = noiseConfig.getOrCreateRandomFactory(new net.minecraft.resources.ResourceLocation("biospheres", "seed")).at(0, 0, 0).nextLong();
+						if (rsSeed != 0) s = rsSeed;
+					} catch (Exception ignored) {}
+				}
 				if (s != 0) {
 					worldSeed = s;
 					seedFound = true;
