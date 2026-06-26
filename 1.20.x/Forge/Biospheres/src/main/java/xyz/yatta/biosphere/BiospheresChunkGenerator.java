@@ -826,26 +826,31 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 			double t = -100;
 			boolean isOnXAxis = false;
 			boolean isPositive = false;
+			boolean onBridge = false;
 
-			if (i == 0 && z >= cz - 2 && z <= cz + 2 && x >= cx + (int)sRadius - 4) {
+			if (i == 0 && z >= cz - 2 && z <= cz + 2 && x >= cx + (int)sRadius - 1 && x <= nesw[i].getX() - (int)targetRadius + 1) {
 				t = (x - (cx + sRadius)) / L;
 				isOnXAxis = true;
 				isPositive = true;
-			} else if (i == 1 && z >= cz - 2 && z <= cz + 2 && x <= cx - (int)sRadius + 4) {
+				onBridge = true;
+			} else if (i == 1 && z >= cz - 2 && z <= cz + 2 && x <= cx - (int)sRadius + 1 && x >= nesw[i].getX() + (int)targetRadius - 1) {
 				t = ((cx - sRadius) - x) / L;
 				isOnXAxis = true;
 				isPositive = false;
-			} else if (i == 2 && x >= cx - 2 && x <= cx + 2 && z >= cz + (int)sRadius - 4) {
+				onBridge = true;
+			} else if (i == 2 && x >= cx - 2 && x <= cx + 2 && z >= cz + (int)sRadius - 1 && z <= nesw[i].getZ() - (int)targetRadius + 1) {
 				t = (z - (cz + sRadius)) / L;
 				isOnXAxis = false;
 				isPositive = true;
-			} else if (i == 3 && x >= cx - 2 && x <= cx + 2 && z <= cz - (int)sRadius + 4) {
+				onBridge = true;
+			} else if (i == 3 && x >= cx - 2 && x <= cx + 2 && z <= cz - (int)sRadius + 1 && z >= nesw[i].getZ() + (int)targetRadius - 1) {
 				t = ((cz - sRadius) - z) / L;
 				isOnXAxis = false;
 				isPositive = false;
+				onBridge = true;
 			}
 
-			if (t >= 0.0 && t <= 1.0) {
+			if (onBridge) {
 				int attachX1 = cx, attachZ1 = cz;
 				int attachX2 = nesw[i].getX(), attachZ2 = nesw[i].getZ();
 				
