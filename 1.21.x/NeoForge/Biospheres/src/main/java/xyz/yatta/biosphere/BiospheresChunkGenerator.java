@@ -59,6 +59,18 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 	protected final BlockState defaultEdge;
 	protected double generatedSphereHeight;
 	private Long actualSeed = null;
+	private double distanceSquared(int x1, int y1, int z1, int x2, int y2, int z2) {
+		double dx = (double)(x1 - x2);
+		double dy = (double)(y1 - y2);
+		double dz = (double)(z1 - z2);
+		return dx * dx + dy * dy + dz * dz;
+	}
+
+	private double distanceSquared2D(int x1, int z1, int x2, int z2) {
+		double dx = (double)(x1 - x2);
+		double dz = (double)(z1 - z2);
+		return dx * dx + dz * dz;
+	}
 
 	private long extractSeedFromRandomState(Object randomState) {
 		if (randomState == null) return 0;
@@ -316,17 +328,15 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 					sRadius = this.getSphereRadius(centerPos.getX(), centerPos.getZ());
 				}
 				
-				double radialDistance = Math.sqrt(current.distSqr(new net.minecraft.core.Vec3i(centerPos.getX(), 0, centerPos.getZ())));
+				double radialDistance = Math.sqrt(distanceSquared2D(realX, realZ, centerPos.getX(), centerPos.getZ()));
 
 				if (radialDistance <= sRadius) {
 					double noise = this.noiseSampler.getValue(realX / 8.0, 0, realZ / 8.0) / 16;
-					double sphereHeight = Math.sqrt(sRadius * sRadius
-							- Math.pow(centerPos.getX() - realX, 2)
-							- Math.pow(realZ - centerPos.getZ(), 2));
+					double sphereHeight = Math.sqrt(sRadius * sRadius - distanceSquared2D(realX, realZ, centerPos.getX(), centerPos.getZ()));
 					
 					for (int y = centerPos.getY() - (int) sphereHeight; y <= centerPos.getY() + sphereHeight; y++) {
-						double lakeDistance = Math.sqrt(centerPos.distSqr(new net.minecraft.core.Vec3i(realX, y, realZ)));
-						double lakeDistance2d = Math.sqrt(centerPos.distSqr(new net.minecraft.core.Vec3i(realX, centerPos.getY(), realZ)));
+						double lakeDistance = Math.sqrt(distanceSquared(realX, y, realZ, centerPos.getX(), centerPos.getY(), centerPos.getZ()));
+						double lakeDistance2d = Math.sqrt(distanceSquared2D(realX, realZ, centerPos.getX(), centerPos.getZ()));
 						
 						double noiseTemp = (noise + y / centerPos.getY());
 						BlockState blockState = Blocks.AIR.defaultBlockState();
@@ -344,7 +354,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 							if (y >= centerPos.getY() && (!fluidBlock.equals(Blocks.STONE.defaultBlockState()) && !fluidBlock.equals(Blocks.NETHERRACK.defaultBlockState()))) {
 								blockState = Blocks.AIR.defaultBlockState();
 							} else if (lakeDistance <= this.lakeRadius) {
-								double belowDist = Math.sqrt(centerPos.distSqr(new net.minecraft.core.Vec3i(realX, y - 1, realZ)));
+								double belowDist = Math.sqrt(distanceSquared(realX, y - 1, realZ, centerPos.getX(), centerPos.getY(), centerPos.getZ()));
 								if (belowDist > this.lakeRadius && fluidBlock.equals(net.minecraft.world.level.block.Blocks.WATER.defaultBlockState())) {
 									java.util.Random lakeRandom = new java.util.Random(centerPos.asLong());
 									boolean hasKelp = lakeRandom.nextBoolean();
@@ -376,7 +386,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 							}
 							
 							if (depth < 4) {
-								double shoreDist = Math.sqrt(centerPos.distSqr(new net.minecraft.core.Vec3i(realX, centerPos.getY(), realZ)));
+								double shoreDist = Math.sqrt(distanceSquared2D(realX, realZ, centerPos.getX(), centerPos.getZ()));
 								boolean isShore = !fluidBlock.isAir() && shoreDist > this.lakeRadius && shoreDist <= this.lakeRadius + this.shoreRadius;
 								boolean isLakeBottom = !fluidBlock.isAir() && shoreDist <= this.lakeRadius && y <= centerPos.getY();
 								
@@ -549,7 +559,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 				int z = chunkPos.getMinBlockZ() + random.nextInt(16);
 				int y = this.getMinY() + random.nextInt(this.getGenDepth());
 
-				if (centerPos.distSqr(new net.minecraft.core.Vec3i(x, y, z)) <= sRadius * sRadius) {
+				if (distanceSquared(x, y, z, centerPos.getX(), centerPos.getY(), centerPos.getZ()) <= sRadius * sRadius) {
 					BlockState oreState = getOreForHeight(y, random);
 					if (oreState != null) {
 						int veinSize = 3 + random.nextInt(5);
@@ -689,16 +699,14 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 					}
 				}
 				
-				double radialDistance = Math.sqrt(centerPos.distSqr(new net.minecraft.core.Vec3i(x, centerPos.getY(), z)));
+				double radialDistance = Math.sqrt(distanceSquared2D(x, z, centerPos.getX(), centerPos.getZ()));
 				double noise = this.noiseSampler.getValue(x / 8.0, 0, z / 8.0) / 16;
 				
 				if (radialDistance <= sRadius + 16) {
-					double sphereHeight = Math.sqrt(sRadius * sRadius
-							- Math.pow(centerPos.getX() - x, 2)
-							- Math.pow(z - centerPos.getZ(), 2));
+					double sphereHeight = Math.sqrt(sRadius * sRadius - distanceSquared2D(x, z, centerPos.getX(), centerPos.getZ()));
 					
 					for (int y = centerPos.getY() - (int) sphereHeight; y <= sphereHeight + centerPos.getY(); y++) {
-						double newRadialDistance = Math.sqrt(centerPos.distSqr(new net.minecraft.core.Vec3i(x, y, z)));
+						double newRadialDistance = Math.sqrt(distanceSquared(x, y, z, centerPos.getX(), centerPos.getY(), centerPos.getZ()));
 						double noiseTemp = (noise + y / centerPos.getY());
 						BlockState blockState = null;
 						
@@ -734,12 +742,10 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 						}
 					}
 					
-					double largerSphereHeight = Math.sqrt((sRadius + 16) * (sRadius + 16)
-							- Math.pow(centerPos.getX() - x, 2)
-							- Math.pow(z - centerPos.getZ(), 2));
+					double largerSphereHeight = Math.sqrt((sRadius + 16) * (sRadius + 16) - distanceSquared2D(x, z, centerPos.getX(), centerPos.getZ()));
 							
 					for (int y = this.getMinY(); y < this.getGenDepth() + this.getMinY(); y++) {
-						double newRadialDistance = Math.sqrt(centerPos.distSqr(new net.minecraft.core.Vec3i(x, y, z)));
+						double newRadialDistance = Math.sqrt(distanceSquared(x, y, z, centerPos.getX(), centerPos.getY(), centerPos.getZ()));
 						if (newRadialDistance >= sRadius) {
 							// Note: finishBiospheres runs AFTER features, replacing blocks outside sphere with AIR
 							if (y >= this.getMinY() && y < this.getGenDepth() + this.getMinY()) {
@@ -1105,7 +1111,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 	@Override
 	public int getBaseHeight(int x, int z, net.minecraft.world.level.levelgen.Heightmap.Types heightmap, net.minecraft.world.level.LevelHeightAccessor world, net.minecraft.world.level.levelgen.RandomState noiseConfig) {
 		BlockPos centerPos = this.getNearestCenterSphere(new BlockPos(x, 0, z));
-		double radialDistance = Math.sqrt(Math.pow(x - centerPos.getX(), 2) + Math.pow(z - centerPos.getZ(), 2));
+		double radialDistance = Math.sqrt(distanceSquared2D(x, z, centerPos.getX(), centerPos.getZ()));
 		if (radialDistance < sphereRadius) {
 			return centerPos.getY();
 		}
@@ -1168,7 +1174,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 				net.minecraft.world.level.ChunkPos cPos = start.getChunkPos();
 				net.minecraft.core.BlockPos startPos = new net.minecraft.core.BlockPos(cPos.getMinBlockX(), 0, cPos.getMinBlockZ());
 				net.minecraft.core.BlockPos centerPos = this.getNearestCenterSphere(startPos);
-				double distance = Math.sqrt(centerPos.distSqr(new net.minecraft.core.Vec3i(startPos.getX(), centerPos.getY(), startPos.getZ())));
+				double distance = Math.sqrt(distanceSquared2D(startPos.getX(), startPos.getZ(), centerPos.getX(), centerPos.getZ()));
 				double sRadius = this.getSphereRadius(centerPos.getX(), centerPos.getZ());
 
 				net.minecraft.resources.ResourceLocation id = structureRegistry.getKey(structure);

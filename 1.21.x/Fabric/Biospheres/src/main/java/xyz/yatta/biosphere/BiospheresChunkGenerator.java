@@ -59,6 +59,18 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 	protected final BlockState defaultEdge;
 	protected double generatedSphereHeight;
 	private Long actualSeed = null;
+	private double distanceSquared(int x1, int y1, int z1, int x2, int y2, int z2) {
+		double dx = (double)(x1 - x2);
+		double dy = (double)(y1 - y2);
+		double dz = (double)(z1 - z2);
+		return dx * dx + dy * dy + dz * dz;
+	}
+
+	private double distanceSquared2D(int x1, int z1, int x2, int z2) {
+		double dx = (double)(x1 - x2);
+		double dz = (double)(z1 - z2);
+		return dx * dx + dz * dz;
+	}
 
 	private long extractSeedFromRandomState(Object randomState) {
 		if (randomState == null) return 0;
@@ -299,9 +311,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 
 				if (radialDistance <= sRadius) {
 					double noise = this.noiseSampler.sample(realX / 8.0, 0, realZ / 8.0, 1 / 16.0, 1 / 16.0, false) / 16;
-					double sphereHeight = Math.sqrt(sRadius * sRadius
-							- Math.pow(centerPos.getX() - realX, 2)
-							- Math.pow(realZ - centerPos.getZ(), 2));
+					double sphereHeight = Math.sqrt(sRadius * sRadius - distanceSquared2D(realX, realZ, centerPos.getX(), centerPos.getZ()));
 					
 					for (int y = centerPos.getY() - (int) sphereHeight; y <= centerPos.getY() + sphereHeight; y++) {
 						double lakeDistance = Math.sqrt(centerPos.getSquaredDistance(realX, y, realZ));
@@ -611,9 +621,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 				double noise = this.noiseSampler.sample(x / 8.0, 0, z / 8.0, 1 / 16.0, 1 / 16.0, false) / 16;
 				
 				if (radialDistance <= sRadius + 16) {
-					double sphereHeight = Math.sqrt(sRadius * sRadius
-							- Math.pow(centerPos.getX() - x, 2)
-							- Math.pow(z - centerPos.getZ(), 2));
+					double sphereHeight = Math.sqrt(sRadius * sRadius - distanceSquared2D(x, z, centerPos.getX(), centerPos.getZ()));
 					
 					for (int y = centerPos.getY() - (int) sphereHeight; y <= sphereHeight + centerPos.getY(); y++) {
 						double newRadialDistance = Math.sqrt(centerPos.getSquaredDistance(x, y, z));
@@ -652,9 +660,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 						}
 					}
 					
-					double largerSphereHeight = Math.sqrt((sRadius + 16) * (sRadius + 16)
-							- Math.pow(centerPos.getX() - x, 2)
-							- Math.pow(z - centerPos.getZ(), 2));
+					double largerSphereHeight = Math.sqrt((sRadius + 16) * (sRadius + 16) - distanceSquared2D(x, z, centerPos.getX(), centerPos.getZ()));
 							
 					for (int y = this.getMinimumY(); y < this.getWorldHeight() + this.getMinimumY(); y++) {
 						double newRadialDistance = Math.sqrt(centerPos.getSquaredDistance(x, y, z));
@@ -1008,7 +1014,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 	@Override
 	public int getHeight(int x, int z, Heightmap.Type heightmap, HeightLimitView world, NoiseConfig noiseConfig) {
 		BlockPos centerPos = this.getNearestCenterSphere(new BlockPos(x, 0, z));
-		double radialDistance = Math.sqrt(Math.pow(x - centerPos.getX(), 2) + Math.pow(z - centerPos.getZ(), 2));
+		double radialDistance = Math.sqrt(distanceSquared2D(x, z, centerPos.getX(), centerPos.getZ()));
 		if (radialDistance < sphereRadius) {
 			return centerPos.getY();
 		}

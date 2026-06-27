@@ -1,17 +1,14 @@
 # Yatta Biospheres 🌍
 
-**A modernized, completely overhauled revival of Risugami's classic Biospheres mod.**
+**A completely overhauled revival of the legendary Biospheres mod!**
 
-Experience a completely new way to play Minecraft! Instead of endless terrain, the world is transformed into a vast void filled with massive, floating glass domes. Each dome contains a completely unique ecosystem, connected by intricate wooden bridges. 
+Imagine waking up not in a sprawling landscape, but inside a massive, floating glass dome suspended over an endless void. Every time you cross a narrow wooden bridge, you enter a completely new world. Welcome to **Yatta Biospheres**—a mod that reimagines exploration, survival, and base building!
 
-### Features:
-* **Unique Ecosystems:** Every sphere houses a specific biome—from sunny plains and scorching deserts to frozen tundras and murky swamps. 
-* **Dark Cave Spheres:** With a rare chance, you will encounter pitch-black cave spheres made entirely of Tinted Glass, featuring accurate surfaces like Dripstone, Moss, and Sculk.
-* **Treacherous Ore Spheres:** Floating between the main biospheres are smaller, dense spheres packed with ores, gravel, and scattered lava blocks. High risk, high reward!
-* **Perfectly Sealed Domes:** The generator ensures every glass dome is perfectly spherical and sealed, trimming away stray trees and terrain.
-* **Safe Spawns:** Never spawn on the glass roof again! The mod intelligently teleports you safely inside the first sphere when you join the world or respawn.
-* **Seamless Structure Integration:** Villages, temples, and outposts spawn naturally inside the spheres, cleanly cut off at the glass boundaries.
-* **Third-Party Mod Support:** Fully compatible with custom biomes from other mods! Your favorite modded trees, grass, and mushrooms will generate perfectly inside their own dedicated biospheres.
+### 🔮 What awaits you?
+- **A Universe of Spheres**: The infinite terrain is gone. Instead, the world is a beautiful, interconnected web of giant biospheres. One dome might hold a peaceful Cherry Grove, while the next contains a blistering desert or a frozen tundra.
+- **The Depths Above**: Keep an eye out for rare, pitch-black domes made of Tinted Glass! These **Cave Spheres** are treacherous environments covered in Sculk, Dripstone, or Moss, teeming with monsters but rich in hidden resources.
+- **High Risk, High Reward**: Suspended precariously between the main biospheres are smaller, dense **Ore Spheres**. They are packed with valuable minerals, but beware—one wrong step into a hidden lava pocket, and you'll fall into the void!
+- **Broad Mod Compatibility**: Do you love mods with custom biomes like Autumn Woods or Magical Forests? Most third-party biomes will flawlessly generate inside their own dedicated glass spheres!
 
 ### Supported Versions & Modloaders
 This repository is a monorepo containing source code for multiple Minecraft versions and modloaders:
@@ -29,18 +26,15 @@ This repository is a monorepo containing source code for multiple Minecraft vers
 
 # Yatta Biospheres (Русский) 🌍
 
-**Современное и полностью переработанное возрождение классического мода Biospheres от Risugami.**
+**Полное возрождение легендарного мода Biospheres!**
 
-Откройте для себя совершенно новый способ играть в Minecraft! Вместо бесконечных ландшафтов мир превращается в огромную пустоту, заполненную гигантскими парящими стеклянными куполами. Каждый купол содержит свою уникальную экосистему, а соединяются они между собой сложной сетью деревянных мостов.
+Представь: ты просыпаешься не на привычной бесконечной равнине, а внутри гигантского стеклянного купола, парящего над бескрайней пустотой. Каждый раз, когда ты переходишь по шаткому деревянному мосту, ты попадаешь в совершенно новый мир. Добро пожаловать в **Yatta Biospheres** — мод, который полностью меняет правила выживания и исследования!
 
-### Особенности:
-* **Уникальные экосистемы:** Каждая сфера содержит определенный биом — от солнечных равнин и палящих пустынь до замерзших тундр и густых болот.
-* **Мрачные пещерные сферы:** С редким шансом вы можете наткнуться на кромешно-темные пещерные сферы. Они состоят из Тонированного стекла, а их поверхность аутентично покрыта капельником, мхом или скалком.
-* **Опасные рудные сферы:** Между основными биосферами парят небольшие, плотные сферы, набитые рудой, гравием и одиночными блоками лавы. Высокий риск, но отличная награда!
-* **Идеальная герметичность:** Генератор гарантирует, что каждый стеклянный купол имеет идеальную форму и герметичен, аккуратно обрезая выступающие деревья и ландшафт.
-* **Безопасный спавн:** Больше никаких возрождений на стеклянной крыше! Мод автоматически телепортирует вас в безопасное место внутрь начальной сферы при входе в мир или возрождении.
-* **Интеграция структур:** Деревни, храмы и аванпосты естественно генерируются внутри сфер, аккуратно вписываясь в границы стекла.
-* **Поддержка сторонних модов:** Полная совместимость с кастомными биомами из других модов! Твои любимые деревья, трава и грибы из модов будут идеально генерироваться внутри своих собственных биосфер.
+### 🔮 Что тебя ждёт?
+- **Вселенная Сфер**: Привычный ландшафт исчез. Теперь мир — это потрясающая сеть взаимосвязанных биосфер. В одном куполе может цвести мирная Вишневая роща, а в соседнем — бушевать метель или палить солнце пустыни.
+- **Мрачные Глубины**: Иногда тебе будут встречаться редкие, абсолютно темные купола из Тонированного стекла. Это **Пещерные сферы**, аутентично покрытые скалком, мхом или сталактитами. В них кишат монстры, но хранятся несметные богатства.
+- **Опасные Богатства**: Между основными огромными куполами висят маленькие, но плотные **Рудные сферы**. Они доверху набиты ценными рудами, гравием и скрытыми очагами лавы. Одно неверное движение — и ты сорвешься в бездну!
+- **Совместимость с большинством модов**: Любишь новые биомы? Осенние леса или магические пустоши из большинства твоих любимых модов идеально сгенерируются в собственных стеклянных куполах!
 
 ### Поддерживаемые версии
 Этот репозиторий является монорепой (monorepo) и содержит исходный код для нескольких версий и загрузчиков:
