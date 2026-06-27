@@ -591,7 +591,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 						if (centerPos.getSquaredDistance(current) <= (sRadius - 1) * (sRadius - 1)) {
 							BlockState state = chunk.getBlockState(current);
 							if (state.isOf(Blocks.STONE) || state.isOf(Blocks.DEEPSLATE)) {
-								if (this.chunkRandom.nextFloat() < 0.006f) {
+								if (this.chunkRandom.nextFloat() < 0.010f) {
 									BlockState ore = randomCaveOre(y, state.isOf(Blocks.DEEPSLATE));
 									chunk.setBlockState(current, ore, false);
 									net.minecraft.util.math.BlockPos below = current.down();
@@ -1104,6 +1104,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 		}
 	}
 }
+
 
 
 

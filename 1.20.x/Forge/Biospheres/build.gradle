@@ -9,7 +9,7 @@ version = mod_version
 group = mod_group_id
 
 base {
-    archivesName = mod_id
+    archivesName = "${mod_id}-1.20.x"
 }
 
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
@@ -204,5 +204,7 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
 
-tasks.named('jar', Jar) { archiveFileName = 'yatta-biospheres_v1.0.0_Forge-1.20.1.jar' }
+tasks.named('jar', Jar) { archiveFileName = 'yatta-biospheres_v1.0.0_Forge-1.20.x.jar' }
+
+
 

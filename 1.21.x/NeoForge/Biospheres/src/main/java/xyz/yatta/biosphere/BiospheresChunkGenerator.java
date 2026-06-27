@@ -673,7 +673,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 						if (centerPos.distSqr(current) <= (sRadius - 1) * (sRadius - 1)) {
 							BlockState state = chunk.getBlockState(current);
 							if (state.is(Blocks.STONE) || state.is(Blocks.DEEPSLATE)) {
-								if (this.chunkRandom.nextFloat() < 0.006f) {
+								if (this.chunkRandom.nextFloat() < 0.010f) {
 									BlockState ore = randomCaveOre(y, state.is(Blocks.DEEPSLATE));
 									chunk.setBlockState(current, ore, false);
 									net.minecraft.core.BlockPos below = current.below();
@@ -774,7 +774,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 								current.set(x, y, z);
 								BlockState currState = chunk.getBlockState(current);
 								if (currState.is(Blocks.STONE) || currState.is(Blocks.DEEPSLATE)) {
-									if (this.chunkRandom.nextFloat() < 0.015f) { // 1.5% extra ore
+									if (this.chunkRandom.nextFloat() < 0.010f) { // 1.5% extra ore
 										chunk.setBlockState(current, randomCaveOre(y), false);
 									}
 								}
@@ -1214,6 +1214,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 		}
 	}
 }
+
 
 
 

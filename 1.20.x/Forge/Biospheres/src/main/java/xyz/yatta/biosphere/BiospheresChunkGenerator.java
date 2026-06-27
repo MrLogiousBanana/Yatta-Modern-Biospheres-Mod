@@ -239,14 +239,11 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 	public java.util.concurrent.CompletableFuture<net.minecraft.world.level.chunk.ChunkAccess> createBiomes(java.util.concurrent.Executor executor, net.minecraft.world.level.levelgen.RandomState randomState, Blender blender, net.minecraft.world.level.StructureManager structureManager, net.minecraft.world.level.chunk.ChunkAccess chunkAccess) {
 		if (this.actualSeed == null) {
 			long s = extractSeedFromStructureManager(structureManager);
-			System.out.println("[BIOSPHERES DEBUG] Seed from StructureManager: " + s);
 			if (s == 0) {
 				try {
 					long rsSeed = randomState.getOrCreateRandomFactory(new net.minecraft.resources.ResourceLocation("biospheres", "seed")).at(0, 0, 0).nextLong();
-					System.out.println("[BIOSPHERES DEBUG] Seed from RandomState Factory: " + rsSeed);
 					if (rsSeed != 0) s = rsSeed;
 				} catch (Exception e) {
-					System.out.println("[BIOSPHERES DEBUG] Exception getting seed from RandomState: " + e.getMessage());
 				}
 			}
 			if (s != 0) {
@@ -254,9 +251,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 				if (this.getBiomeSource() instanceof BiospheresBiomeSource bbs) {
 					bbs.setWorldSeed(s);
 				}
-				System.out.println("[BIOSPHERES DEBUG] Final selected Seed: " + s);
 			} else {
-				System.out.println("[BIOSPHERES DEBUG] SEED IS STILL ZERO!");
 			}
 		}
 		return super.createBiomes(executor, randomState, blender, structureManager, chunkAccess);
@@ -293,7 +288,6 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 			if (!seedFound) {
 				try {
 					long rsSeed = noiseConfig.getOrCreateRandomFactory(new net.minecraft.resources.ResourceLocation("biospheres", "seed")).at(0, 0, 0).nextLong();
-					System.out.println("[BIOSPHERES DEBUG] fillFromNoise Seed from RandomState Factory: " + rsSeed);
 					if (rsSeed != 0) worldSeed = rsSeed;
 					if (worldSeed == 0L) worldSeed = this.seed ^ 0xDEADBEEFL;
 				} catch (Exception e2) {
@@ -688,29 +682,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 						if (centerPos.distSqr(current) <= (sRadius - 1) * (sRadius - 1)) {
 							BlockState state = chunk.getBlockState(current);
 							if (state.is(Blocks.STONE) || state.is(Blocks.DEEPSLATE)) {
-								if (this.chunkRandom.nextFloat() < 0.006f) {
-									BlockState ore = randomCaveOre(y, state.is(Blocks.DEEPSLATE));
-									chunk.setBlockState(current, ore, false);
-									net.minecraft.core.BlockPos below = current.below();
-									if (below.getY() >= this.getMinY()) {
-										BlockState belowState = chunk.getBlockState(below);
-										if (belowState.is(Blocks.STONE) || belowState.is(Blocks.DEEPSLATE)) {
-											chunk.setBlockState(below, ore, false);
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-
-				if (isCaveBiome(biome)) {
-					for (int y = this.getMinY(); y < centerPos.getY() + sRadius - 1; y++) {
-						current.set(x, y, z);
-						if (centerPos.distSqr(current) <= (sRadius - 1) * (sRadius - 1)) {
-							BlockState state = chunk.getBlockState(current);
-							if (state.is(Blocks.STONE) || state.is(Blocks.DEEPSLATE)) {
-								if (this.chunkRandom.nextFloat() < 0.006f) {
+								if (this.chunkRandom.nextFloat() < 0.010f) {
 									BlockState ore = randomCaveOre(y, state.is(Blocks.DEEPSLATE));
 									chunk.setBlockState(current, ore, false);
 									net.minecraft.core.BlockPos below = current.below();
@@ -811,7 +783,7 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 								current.set(x, y, z);
 								BlockState currState = chunk.getBlockState(current);
 								if (currState.is(Blocks.STONE) || currState.is(Blocks.DEEPSLATE)) {
-									if (this.chunkRandom.nextFloat() < 0.015f) { // 1.5% extra ore
+									if (this.chunkRandom.nextFloat() < 0.010f) { // 1.5% extra ore
 										chunk.setBlockState(current, randomCaveOre(y), false);
 									}
 								}
@@ -1266,6 +1238,8 @@ public class BiospheresChunkGenerator extends ChunkGenerator {
 		}
 	}
 }
+
+
 
 
 
